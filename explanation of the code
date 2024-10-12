@@ -1,0 +1,218 @@
+Here’s a detailed explanation of the provided Java code for comparing search algorithms using a graphical representation and a results table:
+
+Package Declaration
+java
+Copier le code
+package complexite;
+This line declares that the class RechercheAvecCourbe is part of the complexite package, which helps in organizing classes logically.
+
+Imports
+java
+Copier le code
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+These lines import various classes:
+
+Swing components for creating the GUI.
+JFreeChart classes for creating charts.
+Java Collections classes for working with lists and random number generation.
+Class Declaration
+java
+
+public class RechercheAvecCourbe extends JFrame {
+This line declares a public class RechercheAvecCourbe, which extends JFrame. This means it is a type of window that can contain GUI components.
+Constructor
+java
+
+public RechercheAvecCourbe(String titre) {
+    super(titre);
+    setLayout(new BorderLayout());
+}
+The constructor takes a title as an argument for the JFrame and calls the superclass constructor with this title.
+It sets the layout of the frame to BorderLayout, which allows components to be arranged in five regions (North, South, East, West, Center).
+Method to Create Graph and Table
+java
+
+public void creerGraphiqueEtTable(List<Integer> tailles, List<Double> tempsSequentiel,
+                                  List<Double> tempsDichotomiqueIterative, List<Double> tempsDichotomiqueRecursive) {
+This method creates a graph and a table to display search algorithm performance.
+
+Creating the Graph:
+Three XYSeries objects are created to hold data for each search algorithm.
+The method loops through the sizes of the arrays and adds the corresponding average times to each series.
+java
+
+XYSeriesCollection dataset = new XYSeriesCollection();
+dataset.addSeries(serieSeq);
+dataset.addSeries(serieDichoIter);
+dataset.addSeries(serieDichoRec);
+An XYSeriesCollection is created to hold all series, which are then added to it.
+java
+
+JFreeChart chart = ChartFactory.createXYLineChart(
+        "Comparaison des Algorithmes de Recherche",
+        "Taille du Tableau",
+        "Temps (secondes)",
+        dataset,
+        PlotOrientation.VERTICAL,
+        true,
+        true,
+        false
+);
+A chart is created using ChartFactory, specifying the title, axis labels, dataset, orientation, and other options.
+Adding the Chart to the Frame:
+java
+
+ChartPanel chartPanel = new ChartPanel(chart);
+chartPanel.setPreferredSize(new Dimension(800, 400));
+add(chartPanel, BorderLayout.CENTER);
+The chart is added to the center of the JFrame.
+Creating the Results Table:
+java
+
+JTable table = creerTableResultats(tailles, tempsSequentiel, tempsDichotomiqueIterative, tempsDichotomiqueRecursive);
+JScrollPane scrollPane = new JScrollPane(table);
+add(scrollPane, BorderLayout.SOUTH);
+The results table is created and added to the southern part of the frame inside a scroll pane for better visibility.
+Finalizing the JFrame:
+java
+
+pack();
+setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+setVisible(true);
+The pack() method sizes the frame to fit the preferred sizes of its components.
+The default close operation is set to exit the application when the window is closed.
+Finally, the frame is made visible.
+Method to Create Results Table
+java
+
+private JTable creerTableResultats(List<Integer> tailles, List<Double> tempsSeq, 
+                                   List<Double> tempsDichoIter, List<Double> tempsDichoRec) {
+    DefaultTableModel model = new DefaultTableModel();
+    model.addColumn("Taille du Tableau");
+    model.addColumn("Temps Séquentiel (s)");
+    model.addColumn("Temps Dichotomique Itératif (s)");
+    model.addColumn("Temps Dichotomique Récursif (s)");
+This method initializes a DefaultTableModel and adds columns for array size and the average times of the search algorithms.
+java
+
+for (int i = 0; i < tailles.size(); i++) {
+    model.addRow(new Object[]{
+        tailles.get(i), tempsSeq.get(i), tempsDichoIter.get(i), tempsDichoRec.get(i)
+    });
+}
+A loop adds each row of data to the table model.
+java
+
+return new JTable(model);
+A JTable is created using the model and returned.
+Main Method
+java
+
+public static void main(String[] args) {
+    Random random = new Random();
+    List<Integer> tailles = List.of(2000, 4000, 6000, 8000, 10000); // Sizes of the array
+The main method initializes a Random object and defines a list of different array sizes.
+Measuring Execution Times
+java
+
+List<Double> tempsSequentiel = new ArrayList<>();
+List<Double> tempsDichotomiqueIterative = new ArrayList<>();
+List<Double> tempsDichotomiqueRecursive = new ArrayList<>();
+int element = 5000;  // Element to search
+Lists are created to store average execution times for each search algorithm, and an element to search for is defined.
+Timing Execution
+java
+
+for (int taille : tailles) {
+    List<Double> seqTemps = new ArrayList<>();
+    List<Double> dichoIterTemps = new ArrayList<>();
+    List<Double> dichoRecTemps = new ArrayList<>();
+For each array size, lists are created to hold the execution times for three runs of each search algorithm.
+java
+
+for (int j = 0; j < 3; j++) {
+    List<Integer> tableau = genererTableauAleatoire(taille, random);
+    Collections.sort(tableau);  // Sort for binary search
+A loop runs three times for each array size to generate a random array, which is then sorted for binary search algorithms.
+Measuring Each Algorithm
+java
+
+seqTemps.add(mesureTempsRecherche(RechercheAvecCourbe::rechercheSequentielle, tableau, element));
+dichoIterTemps.add(mesureTempsRecherche(RechercheAvecCourbe::rechercheDichotomiqueIterative, tableau, element));
+dichoRecTemps.add(mesureTempsRecherche((tab, elem) -> rechercheDichotomiqueRecursive(tab, elem, 0, tab.size() - 1), tableau, element));
+Each search algorithm's execution time is measured using the mesureTempsRecherche method and added to the corresponding list.
+Average Calculation
+java
+
+//tempsSequentiel.add(moyenne(seqTemps));
+tempsDichotomiqueIterative.add(moyenne(dichoIterTemps));
+tempsDichotomiqueRecursive.add(moyenne(dichoRecTemps));
+After three runs, the average execution time for each algorithm is calculated and stored.
+Creating the Chart and Table
+java
+
+new RechercheAvecCourbe("Comparaison des Algorithmes de Recherche")
+    .creerGraphiqueEtTable(tailles, tempsSequentiel, tempsDichotomiqueIterative, tempsDichotomiqueRecursive);
+An instance of RechercheAvecCourbe is created, and the graph and table are displayed.
+Generating Random Arrays
+java
+
+private static List<Integer> genererTableauAleatoire(int taille, Random random) {
+    List<Integer> tableau = new ArrayList<>();
+    for (int i = 0; i < taille; i++) {
+        tableau.add(random.nextInt(taille * 10));  // Random numbers up to taille * 10
+    }
+    return tableau;
+}
+This method generates a random array of integers of the specified size, where each integer is between 0 and taille * 10.
+Measuring Search Execution Time
+java
+
+public static double mesureTempsRecherche(TempsInterface algo, List<Integer> tableau, int element) {
+    long startTime = System.nanoTime();
+    algo.recherche(tableau, element);
+    long endTime = System.nanoTime();
+    return (endTime - startTime) / 1_000_000_000.0;  // Convert to seconds
+}
+The method records the start time, executes the search algorithm, and then records the end time. The execution time is calculated and returned in seconds.
+Average Time Calculation
+java
+
+private static double moyenne(List<Double> temps) {
+    double sum = 0.0;
+    for (double t : temps) {
+        sum += t;
+    }
+    return sum / temps.size();
+}
+This method calculates the average of a list of execution times.
+Search Algorithms Implementation
+Sequential Search:
+
+java
+
+public static int rechercheSequentielle(List<Integer> liste, int element) {
+    for (int i = 0; i < liste.size(); i++) {
+        if (liste.get(i) == element) {
+            return i;
+        }
+    }
+    return -1;
+}
+Iterative Binary Search:
+
+java
+Copier le code
+public static int rechercheDichotomiqueIterative(List<Integer> liste, int element)
